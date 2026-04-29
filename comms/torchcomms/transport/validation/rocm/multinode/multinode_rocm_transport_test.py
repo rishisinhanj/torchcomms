@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import gc
 import os
 import pickle
 import socket
@@ -59,6 +60,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device-index", type=int, default=None)
     parser.add_argument("--store-timeout-seconds", type=int, default=300)
     parser.add_argument("--print-rdma-devices", action="store_true")
+    parser.add_argument(
+        "--no-force-exit",
+        action="store_true",
+        help=(
+            "Return normally after success. By default the harness exits with "
+            "os._exit(0) after flushing output to avoid known ROCm teardown "
+            "hangs in transport destructors."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -135,10 +145,15 @@ def verify_tensor(actual, expected, label: str, rank: int) -> None:
 
 
 def two_phase_barrier(store, rank: int, peer: int, name: str) -> None:
+    """Keep rank 0's TCPStore server alive until rank 1 leaves the barrier."""
     store.set(f"{name}_arrived_{rank}", "1")
     store.get(f"{name}_arrived_{peer}")
     store.set(f"{name}_ack_{rank}", "1")
     store.get(f"{name}_ack_{peer}")
+    if rank == 0:
+        store.get(f"{name}_goodbye_{peer}")
+    else:
+        store.set(f"{name}_goodbye_{rank}", "1")
 
 
 def main() -> int:
@@ -219,6 +234,15 @@ def main() -> int:
 
     two_phase_barrier(store, rank, peer, "final_done")
     print(f"[rank {rank}] multinode RDMA transport validation PASSED", flush=True)
+    if not args.no_force_exit:
+        del rdma
+        del recv_mem
+        del send_mem
+        del read_mem
+        gc.collect()
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(0)
     return 0
 
 
