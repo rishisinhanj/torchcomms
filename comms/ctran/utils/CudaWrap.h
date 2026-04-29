@@ -15,6 +15,7 @@
 
 #if defined(__HIP_PLATFORM_AMD__)
 #include "comms/ctran/utils/HipGdrCheck.h"
+#include <hsa/hsa_ext_amd.h>
 #endif
 
 template <>
@@ -351,12 +352,20 @@ inline CUmemGenericAllocationHandle toFormattableHandle(
 inline int getCuMemDmaBufFd(
     const void* buf,
     const size_t len,
-    bool dataDirectPci = false) {
+    bool dataDirectPci = false,
+    uint64_t* dmaBufOffset = nullptr) {
 #if defined(__HIP_PLATFORM_AMD__)
-  // TODO: Implement this feature for HIP with ROCm 7.0.
-  // `cuMemGetHandleForAddressRange` will be supported in ROCm 7.0
-  // (https://ontrack.amd.com/browse/FBA-621).
-  return -1;
+  int dmabufFd = -1;
+  uint64_t offset = 0;
+  hsa_status_t status = hsa_amd_portable_export_dmabuf(
+      buf, len, &dmabufFd, &offset);
+  if (status != HSA_STATUS_OK || dmabufFd < 0) {
+    return -1;
+  }
+  if (dmaBufOffset) {
+    *dmaBufOffset = offset;
+  }
+  return dmabufFd;
 #else
   int flags = 0;
 #if CUDA_VERSION >= 12080

@@ -876,8 +876,10 @@ commResult_t CtranIb::regMem(
         cudaDev * NCCL_CTRAN_IB_DEVICES_PER_RANK * NCCL_CTRAN_IB_DEVICE_STRIDE +
         device;
     const auto& pd = s->getIbvPd(pdIdx);
+    uint64_t dmaBufOffset = 0;
     int dmaBufFd = useDmaBuf
-        ? ctran::utils::getCuMemDmaBufFd(buf, len, pd.useDataDirect())
+        ? ctran::utils::getCuMemDmaBufFd(
+              buf, len, pd.useDataDirect(), &dmaBufOffset)
         : -1;
     auto makeErrorInfo = [&]() {
       return fmt::format(
@@ -897,7 +899,7 @@ commResult_t CtranIb::regMem(
     };
     if (useDmaBuf && dmaBufFd != -1) {
       auto maybeDmabufMr = pd.regDmabufMr(
-          0, len, reinterpret_cast<uint64_t>(buf), dmaBufFd, access);
+          dmaBufOffset, len, reinterpret_cast<uint64_t>(buf), dmaBufFd, access);
       FOLLY_EXPECTED_CHECKGOTO(maybeDmabufMr, fail, makeErrorInfo());
       mrs->emplace_back(std::move(*maybeDmabufMr));
     } else {

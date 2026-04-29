@@ -1,4 +1,6 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
+#include <dlfcn.h>
+
 #include <folly/ScopeGuard.h>
 
 #include "comms/ctran/utils/Checks.h"
@@ -358,7 +360,27 @@ bool isCommCudaLibraryInited() {
 }
 
 commResult_t dmaBufDriverSupport(int cudaDev) {
-#if CUDA_VERSION >= 11070
+#if defined(__HIP_PLATFORM_AMD__)
+  // On AMD, DMA-BUF support is available via hsa_amd_portable_export_dmabuf.
+  // Verify the HSA function is resolvable at runtime.
+  void* handle = dlopen("libhsa-runtime64.so", RTLD_NOW | RTLD_NOLOAD);
+  if (!handle) {
+    handle = dlopen("libhsa-runtime64.so", RTLD_NOW);
+  }
+  if (handle) {
+    auto fn = dlsym(handle, "hsa_amd_portable_export_dmabuf");
+    dlclose(handle);
+    if (fn) {
+      CLOGF_SUBSYS(
+          INFO,
+          INIT,
+          "DMA-BUF is available on GPU device {} (via HSA)",
+          cudaDev);
+      return commSuccess;
+    }
+  }
+  return commInternalError;
+#elif CUDA_VERSION >= 11070
   int flag = 0;
   CUdevice dev;
   int cudaDriverVersion;
