@@ -23,6 +23,7 @@
 #define cudaSuccess hipSuccess
 #define cudaErrorNotReady hipErrorNotReady
 #define cudaErrorInvalidValue hipErrorInvalidValue
+#define cudaErrorInvalidResourceHandle hipErrorInvalidResourceHandle
 #define cudaErrorIllegalState hipErrorNotReady
 #define cudaErrorLaunchFailure hipErrorLaunchFailure
 #define cudaErrorContextIsDestroyed hipErrorDeinitialized
@@ -76,6 +77,7 @@
 #define cudaStreamCaptureMode hipStreamCaptureMode
 #define cudaStreamCreate hipStreamCreate
 #define cudaStreamCreateWithFlags hipStreamCreateWithFlags
+#define cudaStreamCreateWithPriority hipStreamCreateWithPriority
 #define cudaStreamDestroy hipStreamDestroy
 #define cudaStreamSynchronize hipStreamSynchronize
 #define cudaStreamWaitEvent hipStreamWaitEvent

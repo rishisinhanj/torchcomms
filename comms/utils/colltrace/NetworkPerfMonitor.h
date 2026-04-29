@@ -4,6 +4,7 @@
 
 #include <boost/icl/discrete_interval.hpp>
 #include <boost/icl/interval_map.hpp>
+#include <folly/Synchronized.h>
 #include <folly/concurrency/UnboundedQueue.h>
 #include <chrono>
 #include <memory>

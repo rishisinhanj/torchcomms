@@ -4,7 +4,11 @@
 
 #include <sstream>
 
+#if __has_include(<folly/debugging/symbolizer/Symbolizer.h>)
 #include <folly/debugging/symbolizer/Symbolizer.h>
+#else
+#include <folly/experimental/symbolizer/Symbolizer.h>
+#endif
 #include <folly/json/json.h>
 
 #include "comms/utils/cvars/nccl_cvars.h" // @manual=fbcode//comms/utils/cvars:ncclx-cvars

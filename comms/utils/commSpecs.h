@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include <fmt/format.h>
 #include <folly/Expected.h>
 #include <folly/Hash.h>
 #include <folly/Unit.h>

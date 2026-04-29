@@ -359,7 +359,7 @@ inline int getCuMemDmaBufFd(
   uint64_t offset = 0;
   hsa_status_t status = hsa_amd_portable_export_dmabuf(
       buf, len, &dmabufFd, &offset);
-  if (status != HSA_STATUS_OK || dmabufFd < 0) {
+  if (status != HSA_STATUS_SUCCESS || dmabufFd < 0) {
     return -1;
   }
   if (dmaBufOffset) {

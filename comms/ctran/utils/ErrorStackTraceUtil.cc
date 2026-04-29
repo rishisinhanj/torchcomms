@@ -2,7 +2,11 @@
 
 #include <fmt/printf.h>
 #include <folly/ExceptionString.h>
+#if __has_include(<folly/debugging/exception_tracer/SmartExceptionTracer.h>)
 #include <folly/debugging/exception_tracer/SmartExceptionTracer.h>
+#else
+#include <folly/experimental/exception_tracer/SmartExceptionTracer.h>
+#endif
 #include <folly/logging/xlog.h>
 
 #include "comms/ctran/utils/ErrorStackTraceUtil.h"
