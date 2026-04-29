@@ -5,7 +5,7 @@ set -euo pipefail
 # prefix produced by build_transport_deps.sh.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-TORCHCOMMS_DIR="${TORCHCOMMS_DIR:-$(cd "${SCRIPT_DIR}/../../../../../../.." && pwd -P)}"
+TORCHCOMMS_DIR="${TORCHCOMMS_DIR:-$(cd "${SCRIPT_DIR}/../../../../../.." && pwd -P)}"
 DEPS_ROOT="${DEPS_ROOT:-${TORCHCOMMS_DIR}/.deps/transport}"
 PREFIX="${PREFIX:-${DEPS_ROOT}/prefix}"
 LOG_DIR="${LOG_DIR:-${DEPS_ROOT}/logs}"

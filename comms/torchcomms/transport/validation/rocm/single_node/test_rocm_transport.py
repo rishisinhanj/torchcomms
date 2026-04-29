@@ -12,7 +12,7 @@ from pathlib import Path
 # Resolve paths relative to the torchcomms repository by default.
 ROOT = Path(__file__).resolve().parent
 TORCHCOMMS_DIR = Path(
-    os.environ.get("TORCHCOMMS_DIR", ROOT.parents[6])
+    os.environ.get("TORCHCOMMS_DIR", ROOT.parents[5])
 ).resolve()
 DEPS_PREFIX = Path(
     os.environ.get("DEPS_PREFIX", TORCHCOMMS_DIR / ".deps" / "transport" / "prefix")
