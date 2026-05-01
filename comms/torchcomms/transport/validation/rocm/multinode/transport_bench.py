@@ -210,14 +210,13 @@ def run_tcp(rank: int, sock: socket.socket, store: dist.TCPStore,
             gpu.copy_(host_buf)
             torch.cuda.synchronize(device)
 
-    # Warmup
-    warmup = 0
-    t0 = time.perf_counter()
-    while True:
+    # Warmup: TCP is two-sided so both ranks must run the SAME number of
+    # iters or the receiver exits early, the sender's sendall blocks on
+    # backpressure, and the warmup barrier deadlocks. Use a fixed small
+    # iter count instead of the time-bounded loop the RDMA path uses.
+    warmup = min(20, iters)
+    for _ in range(warmup):
         step()
-        warmup += 1
-        if warmup >= WARMUP_CAP or (time.perf_counter() - t0) >= WARMUP_S:
-            break
     barrier(store, rank, f"tcp_w_{ns}")
 
     # Measured
